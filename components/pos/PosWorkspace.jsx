@@ -7,12 +7,15 @@ import MedicineCatalog from "@/components/pos/MedicineCatalog";
 import PosHeader from "@/components/pos/PosHeader";
 import SaleCart from "@/components/pos/SaleCart";
 import { useCheckoutSale } from "@/hook/usePos";
+import { useSettings } from "@/hook/useSettings";
 import { printReceipt } from "@/lib/pos/printReceipt";
 
 export default function PosWorkspace() {
   const [cart, setCart] = useState([]);
   const [pausedCarts, setPausedCarts] = useState([]);
   const checkoutSale = useCheckoutSale();
+  const { data: settings } = useSettings();
+  const taxRate = Number(settings?.tax_rate ?? 5) / 100;
 
   function addToCart(medicine) {
     setCart((items) => {
@@ -87,21 +90,25 @@ export default function PosWorkspace() {
         customer_phone: customerPhone || null,
         payment_method: paymentMethod,
         discount_amount: discountAmount,
+        tax_rate: taxRate,
         items: cart.map((item) => ({
           batch_id: item.batchId,
           quantity: item.quantity,
         })),
       });
       toast.success(`Sale ${sale.invoice_number} completed successfully.`);
-      try {
-        printReceipt({
-          sale,
-          items: cart,
-          customerName,
-          customerPhone,
-        });
-      } catch (printError) {
-        toast.error(printError.message);
+      if (settings?.auto_print_receipt !== false) {
+        try {
+          printReceipt({
+            sale,
+            items: cart,
+            customerName,
+            customerPhone,
+            settings,
+          });
+        } catch (printError) {
+          toast.error(printError.message);
+        }
       }
       setCart([]);
     } catch (error) {
@@ -128,6 +135,7 @@ export default function PosWorkspace() {
             setPausedCarts((carts) => carts.filter((item) => item.id !== id));
             toast.success("Paused cart discarded.");
           }}
+          taxRate={taxRate}
           onCheckout={handleCheckout}
           isCheckingOut={checkoutSale.isPending}
         />

@@ -108,7 +108,11 @@ export default function DashboardNavbar() {
               >
                 Profile settings
               </DropdownMenuItem>
-              <DropdownMenuItem>Store preferences</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/settings")}
+              >
+                Store preferences
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={handleLogout}>

@@ -37,6 +37,7 @@ export default function SaleCart({
   onPause,
   onResume,
   onDiscardPaused,
+  taxRate,
 }) {
   const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [discountAmount, setDiscountAmount] = useState("");
@@ -52,7 +53,7 @@ export default function SaleCart({
   );
   const discount = Math.min(Math.max(Number(discountAmount) || 0, 0), subtotal);
   const taxableAmount = subtotal - discount;
-  const tax = taxableAmount * 0.05;
+  const tax = taxableAmount * taxRate;
   const total = taxableAmount + tax;
 
   return (
@@ -324,7 +325,9 @@ export default function SaleCart({
             </div>
           </div>
           <div className="flex justify-between text-muted-foreground">
-            <span>Tax (5%)</span>
+            <span>
+              Tax ({(taxRate * 100).toFixed(2).replace(/\.00$/, "")}%)
+            </span>
             <span>{formatCurrency(tax)}</span>
           </div>
           <div className="flex justify-between border-t border-border pt-3 text-base font-semibold text-foreground">
